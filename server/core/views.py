@@ -29,11 +29,22 @@ class BookingViewSet(viewsets.ModelViewSet):
 def view_my_profile(request):
     me : User = request.user
     bookings = Booking.objects.filter(Q(client_id=me.pk))
-    return Response({'user': UserSerializer(me, many=False).data, 'bookings' : BookingSerializer(bookings, many=True).data})
+    bk_reply = BookingSerializer(bookings, many=True).data
+
+    return Response({'user': UserSerializer(me, many=False).data, 'bookings' : bk_reply})
 
 @api_view(('GET',))
 def login_evelin(request):
     user = authenticate(request, username='evelin57', password='iamuser')
+    if user is not None:
+        login(request, user)
+        return Response({'user': UserSerializer(request.user, many=False).data })
+    else:
+        return Response({'user': 'Not found.' })
+
+@api_view(('GET',))
+def login_roland(request):
+    user = authenticate(request, username='roland80', password='iamuser')
     if user is not None:
         login(request, user)
         return Response({'user': UserSerializer(request.user, many=False).data })
