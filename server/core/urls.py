@@ -12,4 +12,5 @@ router.register(r'bookings', BookingViewSet)
 
 urlpatterns = [
     path('v1/', include(router.urls)),
+    path('v1/users-filter/', users_filtered),
 ]

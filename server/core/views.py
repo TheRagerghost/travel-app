@@ -1,16 +1,19 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from .models import City, Tour, Booking
 from django.contrib.auth.models import User
 from .serializers import UserSerializer, BookingSerializer, CitySerializer, TourSerializer
+from .paginations import SmallSetPagination
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = SmallSetPagination
 
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
@@ -50,3 +53,13 @@ def login_roland(request):
         return Response({'user': UserSerializer(request.user, many=False).data })
     else:
         return Response({'user': 'Not found.' })
+
+@api_view(('GET',))
+def users_filtered(request):
+    get = request.GET.get('gender','')
+    users = User.objects.filter()
+    if get is 'M' or 'F':
+        users = users.filter(Q(last_name=get))
+        return Response({'user': UserSerializer(users, many=True).data })
+    else:
+        return Response({'users': 'Wrong request.' })
