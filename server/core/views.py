@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from .serializers import UserSerializer, BookingSerializer, CitySerializer, TourSerializer
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
+from django.db.models import Q
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -27,7 +28,8 @@ class BookingViewSet(viewsets.ModelViewSet):
 @login_required
 def view_my_profile(request):
     me : User = request.user
-    return Response({'user': UserSerializer(me, many=False).data })
+    bookings = Booking.objects.filter(Q(client_id=me.pk))
+    return Response({'user': UserSerializer(me, many=False).data, 'bookings' : BookingSerializer(bookings, many=True).data})
 
 @api_view(('GET',))
 def login_evelin(request):
