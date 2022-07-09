@@ -1,7 +1,9 @@
 <template>
     <div>
         <DefaultHeader />
+        <div class=" pt-28 px-32">
         <slot />
+        </div>
     </div>
 </template>
 

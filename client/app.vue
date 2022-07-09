@@ -5,3 +5,11 @@
     </NuxtLayout>
   </div>
 </template>
+
+<script setup>
+import { mainStore } from '~/store/storage'
+
+const store = mainStore()
+await store.fetchTours()
+await store.fetchCities()
+</script>

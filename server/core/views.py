@@ -6,18 +6,21 @@ from django.contrib.auth.models import User
 from .serializers import UserSerializer, BookingSerializer, CitySerializer, TourSerializer
 from .paginations import SmallSetPagination
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
-from django.core.paginator import Paginator
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = SmallSetPagination
 
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
+
+class CityViewSetPaginated(viewsets.ModelViewSet):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
+    pagination_class = SmallSetPagination
 
 class TourViewSet(viewsets.ModelViewSet):
     queryset = Tour.objects.all()
@@ -28,31 +31,12 @@ class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
 
 @api_view(('GET',))
-@login_required
 def view_my_profile(request):
     me : User = request.user
     bookings = Booking.objects.filter(Q(client_id=me.pk))
     bk_reply = BookingSerializer(bookings, many=True).data
 
     return Response({'user': UserSerializer(me, many=False).data, 'bookings' : bk_reply})
-
-@api_view(('GET',))
-def login_evelin(request):
-    user = authenticate(request, username='evelin57', password='iamuser')
-    if user is not None:
-        login(request, user)
-        return Response({'user': UserSerializer(request.user, many=False).data })
-    else:
-        return Response({'user': 'Not found.' })
-
-@api_view(('GET',))
-def login_roland(request):
-    user = authenticate(request, username='roland80', password='iamuser')
-    if user is not None:
-        login(request, user)
-        return Response({'user': UserSerializer(request.user, many=False).data })
-    else:
-        return Response({'user': 'Not found.' })
 
 @api_view(('GET',))
 def users_filtered(request):
@@ -63,3 +47,22 @@ def users_filtered(request):
         return Response({'user': UserSerializer(users, many=True).data })
     else:
         return Response({'users': 'Wrong request.' })
+
+@api_view(('GET',))
+def login_raw(request):
+    username = request.GET.get('username','')
+    password = request.GET.get('password','')
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        bookings = Booking.objects.filter(Q(client_id=user.pk))
+        bk_reply = BookingSerializer(bookings, many=True).data
+
+        return Response({'user': UserSerializer(user, many=False).data, 'bookings' : bk_reply})
+    else:
+        return Response({'user': 'Not found.' })
+
+@api_view(('GET',))
+def logout_raw(request):
+    logout(request)
+    return Response({'user': 'Logged out.' })

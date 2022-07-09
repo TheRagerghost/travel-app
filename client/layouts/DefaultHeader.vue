@@ -6,7 +6,7 @@
                 <NuxtLink
                     class="text-2xl font-bold text-zinc-800 cursor-pointer select-none"
                     to="/"
-                >StoryInDex</NuxtLink>
+                >TraWell <span v-if="loggedUser.user.username != Null">|| {{loggedUser.user.username}}</span></NuxtLink>
             </div>
             <div class="flex space-x-4 items-center justify-end">
                 <NuxtLink
@@ -18,12 +18,12 @@
             </div>
             <div class="flex space-x-4 items-center justify-end">
                 <div class="w-64">
-                    <Listbox v-model="selectedEnv">
+                    <Listbox v-model="selectedUsr">
                         <div class="relative">
                             <ListboxButton
                                 class="relative w-full py-2 pl-3 pr-10 text-right text-lg font-medium text-stone-800 rounded-lg cursor-pointer group hover:text-emerald-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                             >
-                                <span class="block truncate select-none">{{ selectedEnv.title }}</span>
+                                <span class="block truncate select-none">{{ selectedUsr.title }}</span>
                                 <span
                                     class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none"
                                 >
@@ -43,17 +43,17 @@
                                     class="absolute w-full mt-2 overflow-auto text-base bg-white rounded-lg max-h-72 shadow-md focus:outline-none sm:text-sm"
                                 >
                                     <ListboxOption
-                                        :value="environments[environments.length - 1]"
+                                        :value="users[users.length - 1]"
                                         as="div"
                                     >
-                                        <button
+                                        <NuxtLink
                                             type="button"
-                                            @click="newEnvironment"
+                                            :to="'/login'"
                                             class="cursor-pointer select-none relative py-3 pr-10 pl-4 w-full border-b-2 hover:bg-emerald-50"
                                         >
                                             <span
                                                 class="block truncate text-right text-emerald-500 font-semibold"
-                                            >New environment</span>
+                                            >Login user</span>
                                             <span
                                                 class="absolute inset-y-0 right-0 flex items-center pr-2 text-emerald-500"
                                             >
@@ -62,16 +62,17 @@
                                                     aria-hidden="true"
                                                 />
                                             </span>
-                                        </button>
+                                        </NuxtLink>
                                     </ListboxOption>
                                     <ListboxOption
                                         v-slot="{ active, selected }"
-                                        v-for="e in environments"
+                                        v-for="(e, index) in users"
                                         :key="e.title"
                                         :value="e"
                                         as="template"
                                     >
                                         <li
+                                            @click="goLink(index)"
                                             :class="[
                                                 active ? 'text-white bg-emerald-500' : 'text-gray-900',
                                                 'cursor-default select-none relative py-3 pr-10 pl-4',
@@ -119,23 +120,24 @@ import {
 } from '@headlessui/vue'
 import { BellIcon, MenuIcon, XIcon, PlusSmIcon } from '@heroicons/vue/outline'
 import { CheckIcon, SelectorIcon } from '@heroicons/vue/solid'
+import { mainStore } from '~/store/storage'
 
 const navigation = [
-    { name: 'Characters', href: '/characters' },
-    { name: 'Places', href: '/places' },
-    { name: 'Definitions', href: '/definitions' },
-    { name: 'Settings', href: '/settings' },
+    { name: 'Tours', href: '/tours' },
+    { name: 'Cities', href: '/cities' },
+    { name: 'Profile', href: '/profile' },
 ]
 
-const environments = [
-    { title: 'Default' },
-]
-const selectedEnv = ref(environments[0])
+const store = mainStore()
+const users = store.users
+console.log(users[store.currUsr])
 
-function newEnvironment() {
-    let r = (Math.random() + 1).toString(36).substring(7);
-    environments.push({ title: r });
-    selectedEnv.value = r;
+const selectedUsr = ref(users[store.currUsr])
+var loggedUser = await store.loginUser(store.currUsr)
+
+async function goLink(id) {
+    loggedUser = store.loginUser(id)
+    console.log(loggedUser)
 }
 
 </script>

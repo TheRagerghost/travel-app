@@ -1,8 +1,10 @@
 <template>
-  <h3>Cities:</h3>
-  <li v-for="index in cities" :key="index">{{ index.name }}</li>
+<div>
+  <h1>Made by Vishnyakov Andrey 201-327</h1>
+  <p>Это сайт с турами и бронированиями</p>
+</div>
 </template>
 
 <script setup>
-const { data: cities } = await useApiFetch('cities/')
+
 </script>
